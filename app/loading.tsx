@@ -20,21 +20,31 @@ export default function Loading({
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState(5)
   const [timerComplete, setTimerComplete] = useState(false)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
-    if (!show) return
+    if (!show) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = undefined
+      }
+      return
+    }
 
     setTimeRemaining(5)
     setTimerComplete(false)
 
-    timerRef.current = setInterval(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+
+    intervalRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           setTimerComplete(true)
-          if (timerRef.current) {
-            clearInterval(timerRef.current)
-            timerRef.current = null
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = undefined
           }
           return 0
         }
@@ -43,9 +53,9 @@ export default function Loading({
     }, 1000)
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = undefined
       }
     }
   }, [show])
